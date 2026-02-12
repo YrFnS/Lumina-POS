@@ -1,0 +1,7 @@
+{
+  "name": "Lumina POS",
+  "description": "A high-performance, avant-garde Point of Sale system featuring offline capabilities, bilingual support (English/Arabic), and a distinct brutalist-minimalist aesthetic.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
