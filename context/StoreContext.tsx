@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useContext } from 'react';
 import { Order, Language, Theme, ViewMode, Payment, HardwareConfig, FulfillmentStatus, StockMovement, CashTransaction } from '../types';
 import { TRANSLATIONS } from '../constants';
@@ -20,8 +21,10 @@ interface StoreState {
   view: ViewMode;
   isOnline: boolean;
   hardwareConfig: HardwareConfig;
+  isAiChatOpen: boolean; // New State
   toggleLang: () => void;
   toggleTheme: () => void;
+  toggleAiChat: () => void; // New Action
   setView: (view: ViewMode) => void;
   updateHardwareConfig: (config: HardwareConfig) => void;
   
@@ -94,6 +97,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [theme, setTheme] = useState<Theme>('light');
   const [view, setView] = useState<ViewMode>('pos');
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isAiChatOpen, setIsAiChatOpen] = useState(false);
   const [customerName, setCustomerName] = useState('');
   
   const [parkedOrders, setParkedOrders] = useState<Order[]>([]);
@@ -158,6 +162,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Global Actions
   const toggleTheme = () => { setTheme(prev => prev === 'light' ? 'dark' : 'light'); playSound('click'); };
   const toggleLang = () => { setLang(prev => prev === 'en' ? 'ar' : 'en'); playSound('click'); };
+  const toggleAiChat = () => { setIsAiChatOpen(prev => !prev); playSound('click'); };
   const updateHardwareConfig = (config: HardwareConfig) => setHardwareConfig(config);
 
   const deleteProductWrapper = (id: string) => {
@@ -313,7 +318,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   return (
     <StoreContext.Provider value={{
-      lang, theme, view, isOnline, hardwareConfig, toggleLang, toggleTheme, setView, updateHardwareConfig,
+      lang, theme, view, isOnline, hardwareConfig, isAiChatOpen, toggleLang, toggleTheme, toggleAiChat, setView, updateHardwareConfig,
       
       // Inventory
       products: inventory.products, suppliers: inventory.suppliers, categories: inventory.categories, stockMovements: inventory.stockMovements,

@@ -1,8 +1,9 @@
+
 import { useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 
 export const useKeyboardShortcuts = () => {
-  const { view, setView, cart, clearCart, toggleTheme } = useStore();
+  const { view, setView, cart, clearCart, toggleTheme, toggleAiChat } = useStore();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -21,6 +22,7 @@ export const useKeyboardShortcuts = () => {
         case 'F2': e.preventDefault(); setView('inventory'); break;
         case 'F3': e.preventDefault(); setView('crm'); break;
         case 'F4': e.preventDefault(); setView('reports'); break;
+        case 'F5': e.preventDefault(); toggleAiChat(); break;
         
         // Actions
         case 'Escape': 
@@ -36,5 +38,5 @@ export const useKeyboardShortcuts = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [view, setView, cart, clearCart, toggleTheme]);
+  }, [view, setView, cart, clearCart, toggleTheme, toggleAiChat]);
 };

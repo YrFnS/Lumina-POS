@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
-import { LayoutGrid, Package, Settings, BarChart3, Users } from 'lucide-react';
+import { LayoutGrid, Package, Settings, BarChart3, Users, Sparkles } from 'lucide-react';
 import { StoreProvider, useStore } from './context/StoreContext';
 import { useBarcodeScanner } from './utils/hardware';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
@@ -9,9 +10,10 @@ import { ReportsView } from './features/reports';
 import { CRMView } from './features/crm';
 import { CustomerView } from './features/customer';
 import { SettingsModal } from './features/settings';
+import { AIChatView } from './features/ai/AIChatView';
 
 const AppLayout: React.FC = () => {
-  const { view, setView, products, addToCart, hardwareConfig, cart, lang, theme } = useStore();
+  const { view, setView, products, addToCart, hardwareConfig, cart, lang, theme, isAiChatOpen, toggleAiChat } = useStore();
   const [showSettings, setShowSettings] = useState(false);
 
   // Global Hardware Hooks
@@ -67,6 +69,16 @@ const AppLayout: React.FC = () => {
           <NavButton target="inventory" icon={Package} shortcut="F2" />
           <NavButton target="crm" icon={Users} shortcut="F3" />
           <NavButton target="reports" icon={BarChart3} shortcut="F4" />
+          
+          <button 
+            onClick={toggleAiChat} 
+            className={`p-3 rounded-xl transition-all relative group ${isAiChatOpen ? 'bg-black text-white dark:bg-lumina-500 dark:text-black shadow-lg' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400'}`}
+            title="Lumina AI (F5)"
+          >
+            <Sparkles size={24} />
+            <span className="absolute right-0 top-0 text-[10px] bg-gray-200 text-gray-800 px-1 rounded opacity-0 group-hover:opacity-100">F5</span>
+          </button>
+
           <div className="flex-1"></div>
           <button onClick={() => setShowSettings(true)} className="p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400"><Settings size={24} /></button>
         </div>
@@ -77,6 +89,7 @@ const AppLayout: React.FC = () => {
       {view === 'crm' && <CRMView />}
       {view === 'reports' && <ReportsView />}
       
+      <AIChatView isOpen={isAiChatOpen} onClose={toggleAiChat} />
       <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
     </div>
   );
