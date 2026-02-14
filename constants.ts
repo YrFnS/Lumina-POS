@@ -1,3 +1,4 @@
+
 import { Product, Translation, Customer, Supplier, Category } from './types';
 
 export const TRANSLATIONS: Translation = {
@@ -135,6 +136,14 @@ export const TRANSLATIONS: Translation = {
   guest: { en: 'Walk-in Customer', ar: 'عميل زائر' },
   selectCustomer: { en: 'Select Customer', ar: 'اختر عميل' },
   searchCustomer: { en: 'Search Name or Phone', ar: 'بحث بالاسم أو الهاتف' },
+  // Doctor
+  doctor: { en: 'Doctor', ar: 'طبيب' },
+  prescription: { en: 'Prescription', ar: 'وصفة طبية' },
+  dosage: { en: 'Dosage', ar: 'الجرعة' },
+  sendToPharmacy: { en: 'Send to Pharmacy', ar: 'إرسال للصيدلية' },
+  pendingRx: { en: 'Pending Prescriptions', ar: 'وصفات معلقة' },
+  loadRx: { en: 'Load Prescription', ar: 'تحميل الوصفة' },
+  rxSent: { en: 'Prescription sent successfully', ar: 'تم إرسال الوصفة بنجاح' },
 };
 
 export const MOCK_CATEGORIES: Category[] = [
@@ -142,11 +151,13 @@ export const MOCK_CATEGORIES: Category[] = [
   { id: 'cat2', name: 'Food', nameAr: 'طعام' },
   { id: 'cat3', name: 'Dessert', nameAr: 'حلويات' },
   { id: 'cat4', name: 'Retail', nameAr: 'تجزئة' },
+  { id: 'cat5', name: 'Medicine', nameAr: 'أدوية' },
 ];
 
 export const MOCK_SUPPLIERS: Supplier[] = [
   { id: 'sup1', name: 'Bean Co.', contactName: 'Jim Bean', phone: '555-1234', email: 'jim@beanco.com', address: '123 Coffee Ln' },
   { id: 'sup2', name: 'Bakery Supplies', contactName: 'Sarah Flour', phone: '555-5678', email: 'sarah@bakery.com' },
+  { id: 'sup3', name: 'PharmaDist', contactName: 'Dr. House', phone: '555-9999', email: 'house@pharma.com' },
 ];
 
 export const MOCK_PRODUCTS: Product[] = [
@@ -179,6 +190,9 @@ export const MOCK_PRODUCTS: Product[] = [
   { id: '10', name: 'Cookie', nameAr: 'كوكيز', sku: 'FD-006', price: 2.00, costPrice: 0.40, stock: 45, minStock: 20, category: 'Dessert', categoryId: 'cat3', color: '#d7ccc8', supplierId: 'sup2' },
   { id: '11', name: 'Water', nameAr: 'ماء', sku: 'BV-005', price: 1.50, costPrice: 0.10, stock: 200, minStock: 50, category: 'Beverages', categoryId: 'cat1', color: '#80deea' },
   { id: '12', name: 'Juice', nameAr: 'عصير', sku: 'BV-006', price: 4.00, costPrice: 1.50, stock: 30, minStock: 10, category: 'Beverages', categoryId: 'cat1', color: '#ffcc80' },
+  { id: '13', name: 'Paracetamol', nameAr: 'باراسيتامول', sku: 'MD-001', price: 5.00, costPrice: 2.50, stock: 100, minStock: 20, category: 'Medicine', categoryId: 'cat5', color: '#e1bee7', supplierId: 'sup3' },
+  { id: '14', name: 'Ibuprofen', nameAr: 'ايبوبروفين', sku: 'MD-002', price: 6.50, costPrice: 3.00, stock: 80, minStock: 15, category: 'Medicine', categoryId: 'cat5', color: '#f8bbd0', supplierId: 'sup3' },
+  { id: '15', name: 'Amoxicillin', nameAr: 'أموكسيسيلين', sku: 'MD-003', price: 12.00, costPrice: 5.00, stock: 50, minStock: 10, category: 'Medicine', categoryId: 'cat5', color: '#ffcdd2', supplierId: 'sup3' },
 ];
 
 export const MOCK_CUSTOMERS: Customer[] = [

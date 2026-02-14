@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { LayoutGrid, Package, Settings, BarChart3, Users, Sparkles } from 'lucide-react';
+import { LayoutGrid, Package, Settings, BarChart3, Users, Sparkles, Stethoscope } from 'lucide-react';
 import { StoreProvider, useStore } from './context/StoreContext';
 import { useBarcodeScanner } from './utils/hardware';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
@@ -8,6 +8,7 @@ import { POSView } from './features/pos';
 import { InventoryView } from './features/inventory';
 import { ReportsView } from './features/reports';
 import { CRMView } from './features/crm';
+import { DoctorView } from './features/doctor';
 import { CustomerView } from './features/customer';
 import { SettingsModal } from './features/settings';
 import { AIChatView } from './features/ai/AIChatView';
@@ -69,6 +70,8 @@ const AppLayout: React.FC = () => {
           <NavButton target="inventory" icon={Package} shortcut="F2" />
           <NavButton target="crm" icon={Users} shortcut="F3" />
           <NavButton target="reports" icon={BarChart3} shortcut="F4" />
+          <div className="w-8 h-px bg-gray-200 dark:bg-gray-800 my-2"></div>
+          <NavButton target="doctor" icon={Stethoscope} shortcut="Dr" />
           
           <button 
             onClick={toggleAiChat} 
@@ -88,6 +91,7 @@ const AppLayout: React.FC = () => {
       {view === 'inventory' && <InventoryView />}
       {view === 'crm' && <CRMView />}
       {view === 'reports' && <ReportsView />}
+      {view === 'doctor' && <DoctorView />}
       
       <AIChatView isOpen={isAiChatOpen} onClose={toggleAiChat} />
       <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />

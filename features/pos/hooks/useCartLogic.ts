@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { CartItem, Product, ProductVariant, Discount } from '../../../types';
 
@@ -15,17 +16,17 @@ export const useCartLogic = (playSound: (type: 'beep' | 'error' | 'click') => vo
     localStorage.setItem('lumina_cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product: Product, selectedVariants: ProductVariant[] = []) => {
+  const addToCart = (product: Product, selectedVariants: ProductVariant[] = [], note?: string) => {
     if (product.stock <= 0) { playSound('error'); return; }
     playSound('beep');
-    const cartItemId = `${product.id}-${selectedVariants.map(v => v.id).sort().join('-')}`;
+    const cartItemId = `${product.id}-${selectedVariants.map(v => v.id).sort().join('-')}-${note || ''}`;
     setCart(prev => {
       const existing = prev.find(item => item.cartItemId === cartItemId);
       if (existing) {
         if (existing.quantity >= product.stock) { playSound('error'); return prev; }
         return prev.map(item => item.cartItemId === cartItemId ? { ...item, quantity: item.quantity + 1 } : item);
       }
-      return [...prev, { cartItemId, product, quantity: 1, selectedVariants }];
+      return [...prev, { cartItemId, product, quantity: 1, selectedVariants, note }];
     });
   };
 

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useContext } from 'react';
-import { Order, Language, Theme, ViewMode, Payment, HardwareConfig, FulfillmentStatus, StockMovement, CashTransaction } from '../types';
+import { Order, Language, Theme, ViewMode, Payment, HardwareConfig, FulfillmentStatus, StockMovement, CashTransaction, Prescription } from '../types';
 import { TRANSLATIONS } from '../constants';
 import { printReceipt } from '../utils/hardware';
 import * as sound from '../utils/sound';
@@ -21,10 +21,10 @@ interface StoreState {
   view: ViewMode;
   isOnline: boolean;
   hardwareConfig: HardwareConfig;
-  isAiChatOpen: boolean; // New State
+  isAiChatOpen: boolean; 
   toggleLang: () => void;
   toggleTheme: () => void;
-  toggleAiChat: () => void; // New Action
+  toggleAiChat: () => void; 
   setView: (view: ViewMode) => void;
   updateHardwareConfig: (config: HardwareConfig) => void;
   
@@ -47,7 +47,7 @@ interface StoreState {
   // From Customer Hook
   customers: any[];
   selectedCustomer: any;
-  setCustomerName: (name: string) => void; // Legacy compatibility
+  setCustomerName: (name: string) => void; 
   setSelectedCustomer: (c: any) => void;
   addCustomer: (c: any) => void;
   updateCustomer: (c: any) => void;
@@ -60,7 +60,7 @@ interface StoreState {
   isRefundMode: boolean;
   setGlobalDiscount: (d: any) => void;
   toggleRefundMode: () => void;
-  addToCart: (p: any, v?: any[]) => void;
+  addToCart: (p: any, v?: any[], note?: string) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, d: number) => void;
   updateCartItemDiscount: (id: string, d: any) => void;
@@ -73,6 +73,11 @@ interface StoreState {
   openShift: (float: number) => void;
   closeShift: (actual: number) => void;
   addCashTransaction: (t: any, a: number, r: string) => void;
+
+  // Prescriptions
+  prescriptions: Prescription[];
+  addPrescription: (rx: Prescription) => void;
+  fulfillPrescription: (id: string) => void;
 
   // Context Orchestration
   parkedOrders: Order[];
@@ -102,6 +107,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   
   const [parkedOrders, setParkedOrders] = useState<Order[]>([]);
   const [salesHistory, setSalesHistory] = useState<Order[]>([]);
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
 
   const [hardwareConfig, setHardwareConfig] = useState<HardwareConfig>({
     autoPrintReceipt: false, kickDrawer: false, showCustomerDisplay: false, soundEnabled: true, printerWidth: '80mm'
@@ -138,6 +144,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     load('lumina_parked', setParkedOrders, []);
     load('lumina_history', setSalesHistory, []);
     load('lumina_hardware', setHardwareConfig, hardwareConfig);
+    load('lumina_prescriptions', setPrescriptions, []);
 
     return () => {
       window.removeEventListener('online', handleStatusChange);
@@ -148,6 +155,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => { localStorage.setItem('lumina_parked', JSON.stringify(parkedOrders)); }, [parkedOrders]);
   useEffect(() => { localStorage.setItem('lumina_history', JSON.stringify(salesHistory)); }, [salesHistory]);
   useEffect(() => { localStorage.setItem('lumina_hardware', JSON.stringify(hardwareConfig)); }, [hardwareConfig]);
+  useEffect(() => { localStorage.setItem('lumina_prescriptions', JSON.stringify(prescriptions)); }, [prescriptions]);
 
   useEffect(() => {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -167,10 +175,19 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const deleteProductWrapper = (id: string) => {
     inventory.deleteProduct(id);
-    // Also remove from cart if present
     if (pos.cart.some(item => item.product.id === id)) {
       pos.setCart(prev => prev.filter(i => i.product.id !== id));
     }
+  };
+
+  // Prescription Logic
+  const addPrescription = (rx: Prescription) => {
+    setPrescriptions(prev => [rx, ...prev]);
+    playSound('success');
+  };
+
+  const fulfillPrescription = (id: string) => {
+    setPrescriptions(prev => prev.map(p => p.id === id ? { ...p, status: 'filled' } : p));
   };
 
   // Orchestrators (Complex Business Logic)
@@ -303,6 +320,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     setSalesHistory(prev => [finalOrder, ...prev]);
+    
+    // Check if any prescription was loaded for this customer and mark as fulfilled?
+    // We don't link directly yet, but future logic could go here.
+    if (crm.selectedCustomer) {
+       // Logic to mark loaded prescriptions as filled could be here if we tracked which prescription was loaded.
+    }
+
     if (hardwareConfig.autoPrintReceipt) { printReceipt(finalOrder, hardwareConfig, lang); }
     playSound('success'); 
     alert(TRANSLATIONS.checkoutSuccess[lang]); 
@@ -339,6 +363,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Shift
       currentShift: shift.currentShift, shiftHistory: shift.shiftHistory,
       openShift: shift.openShift, closeShift: shift.closeShift, addCashTransaction: shift.addCashTransaction,
+
+      // Prescriptions
+      prescriptions, addPrescription, fulfillPrescription,
 
       // Integration
       parkedOrders, salesHistory, parkOrder, restoreOrder, completeOrder, updateOrderFulfillment

@@ -1,9 +1,11 @@
+
 export type Language = 'en' | 'ar';
 export type Theme = 'light' | 'dark';
-export type ViewMode = 'pos' | 'inventory' | 'reports' | 'crm';
+export type ViewMode = 'pos' | 'inventory' | 'reports' | 'crm' | 'doctor';
 export type PaymentMethod = 'cash' | 'card' | 'gift' | 'wallet' | 'check';
 
 export type FulfillmentStatus = 'pending' | 'fulfilled' | 'cancelled';
+export type PrescriptionStatus = 'pending' | 'filled' | 'cancelled';
 
 export interface Customer {
   id: string;
@@ -84,6 +86,30 @@ export interface CartItem {
   note?: string;
 }
 
+export interface PrescriptionItem {
+  productId: string;
+  productName: string;
+  quantity: number;
+  dosage?: string;
+  dosageDetails?: {
+    frequency: string;
+    period: string;
+    timing: string;
+    duration: string;
+  };
+}
+
+export interface Prescription {
+  id: string;
+  customerId: string;
+  customerName: string;
+  doctorName: string;
+  items: PrescriptionItem[];
+  status: PrescriptionStatus;
+  createdAt: number;
+  notes?: string;
+}
+
 export interface Payment {
   id: string;
   method: PaymentMethod;
@@ -106,6 +132,7 @@ export interface Order {
   pointsRedeemed?: number;
   createdAt: number;
   globalDiscount?: Discount;
+  linkedPrescriptionId?: string;
 }
 
 export interface HardwareConfig {
