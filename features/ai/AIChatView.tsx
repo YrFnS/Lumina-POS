@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { GoogleGenAI } from "@google/genai";
+import type React from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Sparkles, Send, X, Bot, User, Loader2 } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
 
@@ -99,36 +99,23 @@ export const AIChatView: React.FC<AIChatViewProps> = ({ isOpen, onClose }) => {
     setIsLoading(true);
 
     try {
-      // Initialize client lazily to prevent crash if key is missing on startup
-      const apiKey = process.env.API_KEY;
-      
-      if (!apiKey) {
-        throw new Error("System Error: API_KEY is missing. Please rename 'GEMINI_API_KEY' to 'API_KEY' in your environment variables.");
-      }
-
-      const ai = new GoogleGenAI({ apiKey });
-      const systemInstruction = getSystemContext();
-      
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: [
-            ...messages.filter(m => m.id !== 'welcome').map(m => ({
-                role: m.role,
-                parts: [{ text: m.text }]
-            })),
-            { role: 'user', parts: [{ text: input }] }
-        ],
-        config: {
-          systemInstruction: systemInstruction,
-          temperature: 0.2, // Low temperature for factual data
-        }
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: getSystemContext(),
+          messages: [
+            ...messages.filter(m => m.id !== 'welcome').map(({ role, text }) => ({ role, text })),
+            { role: 'user', text: input }
+          ]
+        })
       });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Connection to Intelligence Core failed.');
 
-      const text = response.text;
-      const aiMsg: Message = { id: (Date.now() + 1).toString(), role: 'model', text: text || 'System Error.', timestamp: Date.now() };
+      const aiMsg: Message = { id: (Date.now() + 1).toString(), role: 'model', text: result.text || 'System Error.', timestamp: Date.now() };
       setMessages(prev => [...prev, aiMsg]);
     } catch (error: any) {
-      console.error(error);
       const errorText = error.message || 'Connection to Intelligence Core failed.';
       const errorMsg: Message = { id: (Date.now() + 1).toString(), role: 'model', text: errorText, timestamp: Date.now() };
       setMessages(prev => [...prev, errorMsg]);
