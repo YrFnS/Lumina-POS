@@ -3,6 +3,12 @@ import type React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { Sparkles, Send, X, Bot, User, Loader2 } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
+import {
+  buildOpenRouterRequest,
+  loadOpenRouterSettings,
+  openRouterErrorMessage,
+  redactOpenRouterError
+} from './openrouter';
 
 interface Message {
   id: string;
@@ -27,6 +33,7 @@ export const AIChatView: React.FC<AIChatViewProps> = ({ isOpen, onClose }) => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const configuredModel = loadOpenRouterSettings(localStorage).modelId;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -97,26 +104,30 @@ export const AIChatView: React.FC<AIChatViewProps> = ({ isOpen, onClose }) => {
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
+    let apiKey = '';
 
     try {
-      const response = await fetch('/api/gemini', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          systemInstruction: getSystemContext(),
-          messages: [
-            ...messages.filter(m => m.id !== 'welcome').map(({ role, text }) => ({ role, text })),
-            { role: 'user', text: input }
-          ]
-        })
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Connection to Intelligence Core failed.');
+      const settings = loadOpenRouterSettings(localStorage);
+      apiKey = settings.apiKey;
+      const request = buildOpenRouterRequest(
+        settings.apiKey,
+        settings.modelId,
+        getSystemContext(),
+        [
+          ...messages.filter(m => m.id !== 'welcome').map(({ role, text }) => ({ role: role === 'model' ? 'assistant' as const : 'user' as const, content: text })),
+          { role: 'user', content: input }
+        ]
+      );
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', request.init);
+      const result = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(openRouterErrorMessage(response.status, result, apiKey));
 
-      const aiMsg: Message = { id: (Date.now() + 1).toString(), role: 'model', text: result.text || 'System Error.', timestamp: Date.now() };
+      const text = result?.choices?.[0]?.message?.content;
+      if (typeof text !== 'string' || !text.trim()) throw new Error('OpenRouter returned an empty response. Try another model.');
+      const aiMsg: Message = { id: (Date.now() + 1).toString(), role: 'model', text, timestamp: Date.now() };
       setMessages(prev => [...prev, aiMsg]);
-    } catch (error: any) {
-      const errorText = error.message || 'Connection to Intelligence Core failed.';
+    } catch (error: unknown) {
+      const errorText = redactOpenRouterError(error, apiKey) || 'OpenRouter request could not be completed. Check your network and Settings.';
       const errorMsg: Message = { id: (Date.now() + 1).toString(), role: 'model', text: errorText, timestamp: Date.now() };
       setMessages(prev => [...prev, errorMsg]);
     } finally {
@@ -147,7 +158,7 @@ export const AIChatView: React.FC<AIChatViewProps> = ({ isOpen, onClose }) => {
             <h3 className="font-bold text-sm leading-tight">Lumina Intelligence</h3>
             <div className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-              <span className="text-[10px] text-gray-500 uppercase tracking-wider">Online</span>
+              <span className="text-[10px] text-gray-500 uppercase tracking-wider">Browser BYOK</span>
             </div>
           </div>
         </div>
@@ -213,7 +224,7 @@ export const AIChatView: React.FC<AIChatViewProps> = ({ isOpen, onClose }) => {
           </button>
         </div>
         <div className="text-[10px] text-center text-gray-400 mt-2 flex justify-center items-center gap-1">
-           <Sparkles size={8} /> Powered by Gemini 3.0 Flash
+           <Sparkles size={8} /> OpenRouter BYOK{configuredModel ? ` · ${configuredModel}` : ' · configure in Settings'}
         </div>
       </div>
     </div>

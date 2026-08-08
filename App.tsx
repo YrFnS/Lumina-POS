@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import type React from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { LayoutGrid, Package, Settings, BarChart3, Users, Sparkles, Stethoscope } from 'lucide-react';
 import { StoreProvider, useStore } from './context/StoreContext';
 import { useBarcodeScanner } from './utils/hardware';
@@ -83,7 +84,7 @@ const AppLayout: React.FC = () => {
           </button>
 
           <div className="flex-1"></div>
-          <button onClick={() => setShowSettings(true)} className="p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400"><Settings size={24} /></button>
+          <button onClick={() => setShowSettings(true)} aria-label="Settings" title="Settings" className="p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400"><Settings size={24} /></button>
         </div>
       </div>
       
